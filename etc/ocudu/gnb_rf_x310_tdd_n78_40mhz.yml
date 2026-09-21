@@ -1,8 +1,17 @@
 gnb_id: 10GNBID
 
-amf:
-  addr: 192.168.1.1
-  bind_addr: LANIP
+cu_cp:
+  amf:
+    addrs: 192.168.1.1
+    port: 38412
+    bind_addrs: LANIP
+    supported_tracking_areas:
+      - tac: 1
+        plmn_list:
+          - plmn: "99999"
+            tai_slice_support_list:
+              - sst: 1
+                sd: 1
 
 ru_sdr:
   device_driver: uhd
@@ -31,20 +40,17 @@ cell_cfg:
   pusch:
     mcs_table: qam256
     olla_target_bler: 0.1
+  slicing:
+    - sst: 1
+      sd: 1
   ssb:
     ssb_period: 20
-
   tdd_ul_dl_cfg:
     dl_ul_tx_period: 10
     nof_dl_slots: 5
     nof_dl_symbols: 9
     nof_ul_slots: 4
     nof_ul_symbols: 0
-
-slicing:
-  -
-    sst: 1
-    sd: 1
 
 metrics:
   autostart_stdout_metrics: true

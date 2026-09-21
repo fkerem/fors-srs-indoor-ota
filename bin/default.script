@@ -1,5 +1,5 @@
-
 #!/bin/sh
+# shellcheck disable=SC2154  # udhcpc supplies interface, address, and lease variables.
 # Busybox udhcpc dispatcher script. Copyright (C) 2009 by Axel Beckert.
 #
 # Based on the busybox example scripts and the old udhcp source
@@ -8,29 +8,30 @@
 RESOLV_CONF="/etc/resolv.conf"
 MYTABLE=cellular
 
-if grep -q $MYTABLE /etc/iproute2/rt_tables; then
+if grep -q "$MYTABLE" /etc/iproute2/rt_tables; then
 	echo "$MYTABLE already exists in /etc/iproute2/rt_tables"
 else
-	echo 200 $MYTABLE >> /etc/iproute2/rt_tables
+	echo 200 "$MYTABLE" >> /etc/iproute2/rt_tables
 fi
 
-case $1 in
+case ${1:-} in
     bound|renew)
-	[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
-	[ -n "$subnet" ] && NETMASK="netmask $subnet"
+	set -- "$interface" "$ip"
+	[ -n "$broadcast" ] && set -- "$@" broadcast "$broadcast"
+	[ -n "$subnet" ] && set -- "$@" netmask "$subnet"
 
-	/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
-	/sbin/ip route add 10.45.0.1 dev $interface
-	/sbin/ip route add 192.168.70.0/24 dev $interface
+	/sbin/ifconfig "$@"
+	/sbin/ip route add 10.45.0.1 dev "$interface"
+	/sbin/ip route add 192.168.70.0/24 dev "$interface"
 	if [ -n "$router" ]; then
 	    echo "$0: Resetting default routes"
 	    metric=0
 	    for i in $router; do
 		echo "$0: Adding router $i"
-		/sbin/ip route add default via $i dev $interface table $MYTABLE metric $metric
-		while ip rule delete table $MYTABLE 2>/dev/null; do true; done
-		/sbin/ip rule add from $ip table $MYTABLE
-		metric=$(($metric + 1))
+		/sbin/ip route add default via "$i" dev "$interface" table "$MYTABLE" metric "$metric"
+		while ip rule delete table "$MYTABLE" 2>/dev/null; do true; done
+		/sbin/ip rule add from "$ip" table "$MYTABLE"
+		metric=$((metric + 1))
 	    done
 	fi
 	# Update resolver configuration file
@@ -44,9 +45,9 @@ case $1 in
 	done
 
 	if [ -x /sbin/resolvconf ]; then
-	    echo -n "$R" | resolvconf -a "${interface}.udhcpc"
+	    printf '%s' "$R" | resolvconf -a "${interface}.udhcpc"
 	else
-	    echo -n "$R" > "$RESOLV_CONF"
+	    printf '%s' "$R" > "$RESOLV_CONF"
 	fi
 
         ;;
@@ -55,7 +56,7 @@ case $1 in
 	if [ -x /sbin/resolvconf ]; then
 	    resolvconf -d "${interface}.udhcpc"
 	fi
-	/sbin/ifconfig $interface 0.0.0.0
+	/sbin/ifconfig "$interface" 0.0.0.0
 	;;
 
     leasefail)

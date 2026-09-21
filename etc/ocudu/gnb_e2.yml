@@ -1,0 +1,15 @@
+e2:
+  enable_du_e2: E2_ENABLE_DU
+  enable_cu_cp_e2: E2_ENABLE_CU_CP
+  enable_cu_up_e2: E2_ENABLE_CU_UP
+  e2sm_kpm_enabled: true
+  e2sm_rc_enabled: true
+  addrs: E2_TARGET_IP
+  bind_addrs: E2_BIND_IP
+  port: E2_TARGET_PORT
+
+pcap:
+  e2ap_enable: true
+  e2ap_du_filename: /tmp/gnb_e2ap_du.pcap
+  e2ap_cu_cp_filename: /tmp/gnb_e2ap_cu_cp.pcap
+  e2ap_cu_up_filename: /tmp/gnb_e2ap_cu_up.pcap
