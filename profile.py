@@ -106,7 +106,7 @@ pc.defineParameter(
 pc.defineParameter(
     "oran_shared_vlan_name", "Existing private shared VLAN name",
     portal.ParameterType.STRING, "",
-    longDescription="Required only for E2. Use a fresh random alphanumeric name.",
+    longDescription="Required only for E2. Use a fresh random letters/digits/hyphens name.",
     advanced=True)
 pc.defineParameter(
     "oran_shared_vlan_ip", "Peer shared-VLAN address",
