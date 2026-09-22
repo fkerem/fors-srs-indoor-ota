@@ -70,6 +70,8 @@ COMP_MANAGER_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 APPROVED_OCUDU_COMMIT = "050a2bb72e1d794cd60570d809987c1fcda3e54b"
 OPEN5GS_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-open5gs.sh")
 OCUDU_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-ocudu.sh")
+CN_FORWARD_SCRIPT = os.path.join(BIN_PATH, "setup-cn-forwarding.sh")
+GNB_ROUTE_SCRIPT = os.path.join(BIN_PATH, "setup-gnb-route.sh")
 ORAN_SHARED_VLAN_IP_DEFAULT = "10.254.254.2"
 ORAN_SHARED_VLAN_NETMASK_DEFAULT = "255.255.255.0"
 
@@ -187,22 +189,9 @@ if params.enable_oran_e2:
     oran_link.addInterface(oran_if)
     oran_link.connectSharedVlan(params.oran_shared_vlan_name)
 
-    forward_cmd = (
-        "for i in $(seq 1 120); do "
-        "ip -4 addr show | grep -q '{vlan_ip}/' && "
-        "ip -4 addr show | grep -q '192\\.168\\.1\\.1/' && break; "
-        "sleep 1; done; "
-        "ip -4 addr show | grep -q '{vlan_ip}/' || "
-        "{{ echo 'ERROR: shared-VLAN interface was not configured' >&2; exit 1; }}; "
-        "ip -4 addr show | grep -q '192\\.168\\.1\\.1/' || "
-        "{{ echo 'ERROR: core LAN interface was not configured' >&2; exit 1; }}; "
-        "sudo sysctl -w net.ipv4.ip_forward=1; "
-        "sudo modprobe nf_conntrack_sctp; "
-        "sudo iptables -t nat -C POSTROUTING -s 192.168.1.0/24 "
-        "-d {cidr} -j MASQUERADE || "
-        "sudo iptables -t nat -A POSTROUTING -s 192.168.1.0/24 "
-        "-d {cidr} -j MASQUERADE"
-    ).format(vlan_ip=params.oran_shared_vlan_ip, cidr=shared_cidr)
+    forward_cmd = "{} '{}' '{}' '{}'".format(
+        CN_FORWARD_SCRIPT, params.oran_shared_vlan_ip,
+        "192.168.1.1", shared_cidr)
     cn_node.addService(rspec.Execute(shell="bash", command=forward_cmd))
 
 
@@ -235,14 +224,8 @@ def add_x310_pair(idx, x310_radio):
     node.addService(rspec.Execute(
         shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
     if params.enable_oran_e2:
-        route_cmd = (
-            "for i in $(seq 1 120); do "
-            "ip -4 addr show | grep -q '192\\.168\\.1\\.{last}/' && break; "
-            "sleep 1; done; "
-            "ip -4 addr show | grep -q '192\\.168\\.1\\.{last}/' || "
-            "{{ echo 'ERROR: gNB core-LAN interface was not configured' >&2; exit 1; }}; "
-            "sudo ip route replace {cidr} via 192.168.1.1"
-        ).format(last=idx + 2, cidr=shared_cidr)
+        route_cmd = "{} '{}' '{}' '{}'".format(
+            GNB_ROUTE_SCRIPT, lan_ip, shared_cidr, "192.168.1.1")
         node.addService(rspec.Execute(shell="bash", command=route_cmd))
 
 

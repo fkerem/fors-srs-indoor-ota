@@ -12,6 +12,7 @@ ORAN_E2_TARGET_IP=$3
 ORAN_E2_PORT=$4
 ORAN_E2_AGENT_MODE=$5
 PROFILE_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+# shellcheck disable=SC1091  # PROFILE_ROOT is resolved on the target node.
 source "$PROFILE_ROOT/bin/common.sh"
 
 APPROVED_COMMIT=050a2bb72e1d794cd60570d809987c1fcda3e54b

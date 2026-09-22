@@ -58,7 +58,9 @@ metrics:
 log:
   filename: /tmp/gnb.log
   all_level: warning
-  tracing_filename: /tmp/gnb-trace.log
+
+trace:
+  filename: /tmp/gnb-trace.log
 
 pcap:
   mac_enable: false
