@@ -31,7 +31,9 @@ wait_for_address "$vlan_ip"
 wait_for_address "$lan_ip"
 
 sudo sysctl -w net.ipv4.ip_forward=1
-sudo modprobe nf_conntrack_sctp
+if ! sudo modprobe nf_conntrack_sctp; then
+    echo "WARNING: nf_conntrack_sctp is unavailable; continuing with SCTP forwarding" >&2
+fi
 
 if ! sudo iptables -t nat -C POSTROUTING -s 192.168.1.0/24 \
     -d "$shared_cidr" -j MASQUERADE; then
