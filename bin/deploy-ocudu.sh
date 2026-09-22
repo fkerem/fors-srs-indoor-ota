@@ -32,7 +32,7 @@ if [[ ! -d "$OCUDU_DIR/.git" ]]; then
     sudo add-apt-repository -y ppa:ettusresearch/uhd
     sudo apt-get update
     sudo apt-get install -y \
-        backward-cpp cmake gcc g++ iperf3 libboost-dev libfftw3-dev \
+        libbackward-cpp-dev cmake gcc g++ iperf3 libboost-dev libfftw3-dev \
         libgtest-dev libmbedtls-dev libsctp-dev libuhd-dev libyaml-cpp-dev \
         make numactl pkg-config ppp uhd-host
 
