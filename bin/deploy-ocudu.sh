@@ -16,6 +16,7 @@ PROFILE_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 source "$PROFILE_ROOT/bin/common.sh"
 
 APPROVED_COMMIT=050a2bb72e1d794cd60570d809987c1fcda3e54b
+UHD_PACKAGE_VERSION=4.11.0.0-0ubuntu1~jammy4
 OCUDU_DIR="$SRCDIR/ocudu"
 RUNTIME_DIR="$SRCDIR/etc/ocudu"
 PROVENANCE="$SRCDIR/ocudu-build-provenance.txt"
@@ -34,12 +35,22 @@ if [[ ! -d "$OCUDU_DIR/.git" ]]; then
     sudo apt-get update
     sudo apt-get install -y \
         libbackward-cpp-dev cmake gcc g++ iperf3 libboost-dev libfftw3-dev \
-        libgtest-dev libmbedtls-dev libsctp-dev libuhd-dev libyaml-cpp-dev \
-        make numactl pkg-config ppp uhd-host
+        libgtest-dev libmbedtls-dev libsctp-dev \
+        libuhd-dev="$UHD_PACKAGE_VERSION" libyaml-cpp-dev \
+        make numactl pkg-config ppp uhd-host="$UHD_PACKAGE_VERSION"
 
     git clone --no-checkout "$OCUDU_REPO" "$OCUDU_DIR"
     git -C "$OCUDU_DIR" checkout --detach "$COMMIT_HASH"
 fi
+
+UHD_HOST_PACKAGE_VERSION=$(dpkg-query -W -f='${Version}' uhd-host)
+UHD_DEV_PACKAGE_VERSION=$(dpkg-query -W -f='${Version}' libuhd-dev)
+[[ "$UHD_HOST_PACKAGE_VERSION" == "$UHD_PACKAGE_VERSION" && \
+   "$UHD_DEV_PACKAGE_VERSION" == "$UHD_PACKAGE_VERSION" ]] || {
+    echo "ERROR: installed UHD packages do not match pinned version $UHD_PACKAGE_VERSION" >&2
+    exit 1
+}
+UHD_RUNTIME_VERSION=$(uhd_config_info --version)
 
 ACTUAL_COMMIT=$(git -C "$OCUDU_DIR" rev-parse HEAD)
 [[ "$ACTUAL_COMMIT" == "$COMMIT_HASH" ]] || {
@@ -117,6 +128,10 @@ head_mode=detached
 source_tree_clean=true
 cmake_options=-DENABLE_EXPORT=ON -DBUILD_TESTS=OFF
 patches=none
+uhd_package_version=$UHD_PACKAGE_VERSION
+uhd_host_package_version=$UHD_HOST_PACKAGE_VERSION
+libuhd_dev_package_version=$UHD_DEV_PACKAGE_VERSION
+uhd_runtime_version=$UHD_RUNTIME_VERSION
 gnb_version=$GNB_VERSION
 EOF
 

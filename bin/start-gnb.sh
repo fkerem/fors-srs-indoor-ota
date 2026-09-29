@@ -19,6 +19,8 @@ GNB=/var/tmp/ocudu/build/apps/gnb/gnb
 [[ -f "$BASE_CONFIG" ]] || { echo "Missing $BASE_CONFIG" >&2; exit 1; }
 [[ -f "$E2_ENV" ]] || { echo "Missing $E2_ENV" >&2; exit 1; }
 
+"$PROFILE_ROOT/bin/check-uhd-compat.sh"
+
 # Generated only from profile-validated booleans, IPv4 addresses, and integers.
 # shellcheck source=/dev/null
 source "$E2_ENV"

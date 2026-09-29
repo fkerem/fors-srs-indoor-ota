@@ -38,6 +38,11 @@ and build record:
 cat /var/tmp/ocudu-build-provenance.txt
 ```
 
+The gNB launcher probes its allocated X310 before RF. If the probe fails, no
+gNB is started; inspect `/var/tmp/uhd-compat-probe.log` and follow the manual
+X310/UHD recovery procedure in `/local/repository/README.md`. The profile does
+not flash or power-cycle the radio automatically.
+
 If E2 is enabled, the launcher first verifies route selection and establishes
 and closes an SCTP association without sending E2AP payloads. It refuses to
 start without an explicit RF-reservation acknowledgement:
